@@ -2,9 +2,9 @@
 \alias{WebSource}
 \title{Read Web Content and respective Link Content from feedurls.}
 \usage{
-  WebSource(feedurls, class = "WebXMLSource", parser,
-    encoding = "UTF-8", vectorized = FALSE,
-    curlOpts = curlOptions(followlocation = TRUE, maxconnects = 20, maxredirs = 10, timeout = 30, connecttimeout = 30))
+WebSource(feedurls, class = "WebXMLSource", parser, encoding = "UTF-8",
+  vectorized = FALSE, curlOpts = curlOptions(followlocation = TRUE,
+  maxconnects = 20, maxredirs = 10, timeout = 30, connecttimeout = 30))
 }
 \arguments{
   \item{feedurls}{urls from feeds to be retrieved}
@@ -26,18 +26,18 @@
   \code{listCurlOptions()} for all Curl options available.}
 }
 \value{
-  WebSource
+WebSource
 }
 \description{
-  WebSource is derived from \code{\link[tm]{Source}}. In
-  addition to calling the base \code{\link[tm]{Source}}
-  constructor function it also retrieves the specified
-  feedurls and pre--parses the content with the parser
-  function. The fields \code{$Content}, \code{$Feedurls}
-  \code{$Parser} and \code{$CurlOpts} are finally added to
-  the \code{Source} object.
+WebSource is derived from \code{\link[tm]{Source}}. In
+addition to calling the base \code{\link[tm]{Source}}
+constructor function it also retrieves the specified
+feedurls and pre--parses the content with the parser
+function. The fields \code{$Content}, \code{$Feedurls}
+\code{$Parser} and \code{$CurlOpts} are finally added to
+the \code{Source} object.
 }
 \author{
-  Mario Annau
+Mario Annau
 }
 
