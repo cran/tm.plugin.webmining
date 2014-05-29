@@ -38,12 +38,12 @@ yahoonews
 ### code chunk number 6: ShortIntro.Rnw:108-115
 ###################################################
 # Little hack to restrict output width
-meta(yahoonews[[1]], "Description") <- 
-		paste(substring(meta(yahoonews[[1]], "Description"), 1, 70), "...", sep = "")
-meta(yahoonews[[1]], "ID") <- 
-		paste(substring(meta(yahoonews[[1]], "ID"), 1, 70), "...", sep = "")
-meta(yahoonews[[1]], "Origin") <- 
-		paste(substring(meta(yahoonews[[1]], "Origin"), 1, 70), "...", sep = "")
+meta(yahoonews[[1]], "description") <- 
+		paste(substring(meta(yahoonews[[1]], "description"), 1, 70), "...", sep = "")
+meta(yahoonews[[1]], "id") <- 
+		paste(substring(meta(yahoonews[[1]], "id"), 1, 70), "...", sep = "")
+meta(yahoonews[[1]], "origin") <- 
+		paste(substring(meta(yahoonews[[1]], "origin"), 1, 70), "...", sep = "")
 
 
 ###################################################
@@ -56,8 +56,8 @@ meta(yahoonews[[1]])
 ### code chunk number 8: ShortIntro.Rnw:126-129
 ###################################################
 # Little hack to restrict output length
-Content(yahoonews[[1]]) <- 
-		paste(substring(yahoonews[[2]], 1, 100), "...", sep = "")
+content(yahoonews[[1]]) <- 
+		paste(substring(yahoonews[[1]], 1, 100), "...", sep = "")
 
 
 ###################################################
