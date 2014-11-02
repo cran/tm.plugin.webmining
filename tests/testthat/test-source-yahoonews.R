@@ -3,27 +3,26 @@
 # Author: mario
 ###############################################################################
 
-context("GoogleBlogSearchSource")
+context("YahooNewsSource")
 
-test_that("GoogleBlogSearchSource",{
+test_that("YahooNewsSource",{
 	
-	lengthcorp <- 100
-	
-	#FIXME: Error at Retrieval
-	testcorp <- WebCorpus(GoogleBlogSearchSource("Microsoft"))
+	lengthcorp <- 20
+		
+	testcorp <- WebCorpus(YahooNewsSource("Microsoft"))
 	# Check Corpus object
 	expect_that(length(testcorp), equals(lengthcorp))
 	expect_that(class(testcorp), equals(c("WebCorpus","VCorpus","Corpus")))
-
+	
 	# Check Content
-	contentratio <- length(which(sapply(testcorp, nchar)[1,] > 0)) / length(testcorp)
+	#FIXME: No content is retrieved
+	#expect_that(all(sapply(testcorp, nchar) > 0), is_true())
+	contentlength <- sapply(testcorp, function(x) 
+				if( length(content(x)) < 1) 0 else nchar(content(x)))	
+	contentratio <- length(which(contentlength > 0)) / length(testcorp)
 	expect_that(contentratio > 0.5, is_true())
 	
 	# Check Meta Data
-	author <- lapply(testcorp, function(x) meta(x, "author"))
-	expect_that(all(sapply(author, function(x) class(x)[1] == "character")), is_true())
-	expect_that(all(sapply(author, nchar) > 0), is_true())
-			
 	datetimestamp <- lapply(testcorp, function(x) meta(x, "datetimestamp"))
 	expect_that(all(sapply(datetimestamp, function(x) class(x)[1] == "POSIXlt")), is_true())
 	
@@ -42,15 +41,10 @@ test_that("GoogleBlogSearchSource",{
 	expect_that(all(sapply(origin, function(x) class(x)[1] == "character")), is_true())
 	expect_that(all(sapply(origin, nchar) > 0), is_true())
 	
-	origin <- lapply(testcorp, function(x) meta(x, "publisher"))
-	expect_that(all(sapply(origin, function(x) class(x)[1] == "character")), is_true())
-	#expect_that(all(sapply(origin, nchar) > 0), is_true())
-	
 	testcorp <- testcorp[1:10]
 	testcorp <- corpus.update(testcorp)
 	expect_that(length(testcorp) >= lengthcorp, is_true())
 	
 	cat(" | Contentratio: ", sprintf("%.0f%%", contentratio * 100))
-	
 })
 

@@ -3,20 +3,21 @@
 # Author: mario
 ###############################################################################
 
-context("ReutersNewsSource")
+context("GoogleNewsSource")
 
-test_that("ReutersNewsSource",{
+test_that("GoogleNewsSource",{
 	
-	lengthcorp <- 25
+	lengthcorp <- 100
 		
-	testcorp <- WebCorpus(ReutersNewsSource("businessNews"))
+	testcorp <- WebCorpus(GoogleNewsSource("Microsoft"))
 	# Check Corpus object
 	expect_that(length(testcorp), equals(lengthcorp))
 	expect_that(class(testcorp), equals(c("WebCorpus","VCorpus","Corpus")))
 	
 	# Check Content
-	#expect_that(all(sapply(testcorp, nchar) > 0), is_true())
-	contentratio <- length(which(sapply(testcorp, nchar)[1,] > 0)) / length(testcorp)
+	contentlength <- sapply(testcorp, function(x) 
+				if( length(content(x)) < 1) 0 else nchar(content(x)))	
+	contentratio <- length(which(contentlength > 0)) / length(testcorp)
 	expect_that(contentratio > 0.5, is_true())
 	
 	# Check Meta Data
@@ -38,7 +39,7 @@ test_that("ReutersNewsSource",{
 	expect_that(all(sapply(origin, function(x) class(x)[1] == "character")), is_true())
 	expect_that(all(sapply(origin, nchar) > 0), is_true())
 	
-	testcorp <- testcorp[1:5]
+	testcorp <- testcorp[1:10]
 	testcorp <- corpus.update(testcorp)
 	expect_that(length(testcorp) >= lengthcorp, is_true())
 	

@@ -1,6 +1,6 @@
 Package: tm.plugin.webmining
-Version: 1.2
-Date: 2014-05-29
+Version: 1.2.2
+Date: 2014-11-02
 Title: Retrieve structured, textual data from various web sources
 Authors@R: c(person("Mario", "Annau", role = c("aut", "cre"),
     email = "mario.annau@gmail.com"))
@@ -15,9 +15,9 @@ Description: tm.plugin.webmining facilitates text retrieval from feed
 License: GPL-3
 URL: https://github.com/mannau/tm.plugin.webmining
 BugReports: https://github.com/mannau/tm.plugin.webmining/issues
-Packaged: 2014-06-03 08:44:32 UTC; mario
+Packaged: 2014-11-03 20:26:19 UTC; mario
 Author: Mario Annau [aut, cre]
 Maintainer: Mario Annau <mario.annau@gmail.com>
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-06-11 15:06:19
+Date/Publication: 2014-11-03 22:52:17

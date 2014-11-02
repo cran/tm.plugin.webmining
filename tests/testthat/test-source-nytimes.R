@@ -3,19 +3,28 @@
 # Author: mario
 ###############################################################################
 
-context("GoogleNewsSource")
+context("NYTimesSource")
 
-test_that("GoogleNewsSource",{
+test_that("NYTimesSource",{
 	
 	lengthcorp <- 100
-		
-	testcorp <- WebCorpus(GoogleNewsSource("Microsoft"))
+	
+	if(!exists(as.character(substitute(nytimes_appid)))){
+		cat("No Variable nytimes_appid provided. Skipping Test...\n")
+		return()
+	}
+	
+	
+	testcorp <- WebCorpus(NYTimesSource("Microsoft", appid = nytimes_appid, n = lengthcorp))
 	# Check Corpus object
 	expect_that(length(testcorp), equals(lengthcorp))
 	expect_that(class(testcorp), equals(c("WebCorpus","VCorpus","Corpus")))
 	
 	# Check Content
-	contentratio <- length(which(sapply(testcorp, nchar)[1,] > 0)) / length(testcorp)
+	#expect_that(all(sapply(testcorp, nchar) > 0), is_true())
+	contentlength <- sapply(testcorp, function(x) 
+				if( length(content(x)) < 1) 0 else nchar(content(x)))	
+	contentratio <- length(which(contentlength > 0)) / length(testcorp)
 	expect_that(contentratio > 0.5, is_true())
 	
 	# Check Meta Data
@@ -24,6 +33,7 @@ test_that("GoogleNewsSource",{
 	
 	description <- lapply(testcorp, function(x) meta(x, "description"))
 	expect_that(all(sapply(description, function(x) class(x)[1] == "character")), is_true())
+	expect_that(all(sapply(description, nchar) > 0), is_true())
 	
 	heading <- lapply(testcorp, function(x) meta(x, "heading"))
 	expect_that(all(sapply(heading, function(x) class(x)[1] == "character")), is_true())
@@ -32,6 +42,10 @@ test_that("GoogleNewsSource",{
 	id <- lapply(testcorp, function(x) meta(x, "id"))
 	expect_that(all(sapply(id, function(x) class(x)[1] == "character")), is_true())
 	expect_that(all(sapply(id, nchar) > 0), is_true())
+	
+	language <- lapply(testcorp, function(x) meta(x, "language"))
+	expect_that(all(sapply(language, function(x) class(x)[1] == "character")), is_true())
+	expect_that(all(sapply(language, nchar) > 0), is_true())
 	
 	origin <- lapply(testcorp, function(x) meta(x, "origin"))
 	expect_that(all(sapply(origin, function(x) class(x)[1] == "character")), is_true())

@@ -73,9 +73,8 @@ yahoonews[[1]]
 
 
 ###################################################
-### code chunk number 11: ShortIntro.Rnw:159-167 (eval = FALSE)
+### code chunk number 11: ShortIntro.Rnw:159-166 (eval = FALSE)
 ###################################################
-## googleblogsearch <- WebCorpus(GoogleBlogSearchSource("Microsoft"))
 ## googlefinance <- WebCorpus(GoogleFinanceSource("NASDAQ:MSFT"))
 ## googlenews <- WebCorpus(GoogleNewsSource("Microsoft"))
 ## nytimes <- WebCorpus(NYTimesSource("Microsoft", appid = nytimes_appid))
@@ -86,7 +85,7 @@ yahoonews[[1]]
 
 
 ###################################################
-### code chunk number 12: ShortIntro.Rnw:181-182 (eval = FALSE)
+### code chunk number 12: ShortIntro.Rnw:180-181 (eval = FALSE)
 ###################################################
 ## yahoonews <- corpus.update(yahoonews)
 
