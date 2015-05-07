@@ -1,8 +1,3 @@
-# TODO: Add comment
-# 
-# Author: mario
-###############################################################################
-
 context("YahooFinanceSource")
 
 test_that("YahooFinanceSource",{

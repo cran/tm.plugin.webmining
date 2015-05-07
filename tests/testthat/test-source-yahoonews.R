@@ -1,13 +1,8 @@
-# TODO: Add comment
-# 
-# Author: mario
-###############################################################################
-
 context("YahooNewsSource")
 
 test_that("YahooNewsSource",{
 	
-	lengthcorp <- 20
+	lengthcorp <- 10
 		
 	testcorp <- WebCorpus(YahooNewsSource("Microsoft"))
 	# Check Corpus object

@@ -1,19 +1,15 @@
-# TODO: Add comment
-# 
-# Author: mario
-###############################################################################
-
 context("NYTimesSource")
+
+data(nytimes_appid)
 
 test_that("NYTimesSource",{
 	
-	lengthcorp <- 100
+	lengthcorp <- 200
 	
 	if(!exists(as.character(substitute(nytimes_appid)))){
 		cat("No Variable nytimes_appid provided. Skipping Test...\n")
 		return()
 	}
-	
 	
 	testcorp <- WebCorpus(NYTimesSource("Microsoft", appid = nytimes_appid, n = lengthcorp))
 	# Check Corpus object

@@ -12,6 +12,7 @@
 #' @param encoding specifies default encoding, defaults to 'UTF-8'
 #' @param curlOpts a named list or CURLOptions object identifying the curl options for the handle. Type \code{listCurlOptions()} for all Curl options available.
 #' @param postFUN function saved in WebSource object and called to retrieve full text content from feed urls 
+#' @param retrieveFeedURL logical; Specify if feedurls should be downloaded first.
 #' @param ... additional parameters passed to \code{WebSource} object/structure
 #' @return WebSource
 #' @export
@@ -22,12 +23,20 @@ WebSource <- function(feedurls, class = "WebXMLSource", reader, parser, encoding
 				maxconnects = 20,
 				maxredirs = 10,
 				timeout = 30,
-				connecttimeout = 30), postFUN = NULL, ...){
-	content_raw <- getURL(feedurls, .opts = curlOpts)
-	content_parsed <- unlist(lapply(content_raw, parser), recursive = FALSE)
+				connecttimeout = 30), postFUN = NULL, retrieveFeedURL = TRUE, ...){
+
+	content_raw <- NULL
+	if(retrieveFeedURL) {
+		content_raw <- getURL(feedurls, .opts = curlOpts)
+	} else {
+		content_raw <- feedurls
+	}
+  # Filter empty content
+  content_raw <- content_raw[sapply(content_raw, nchar) > 0]
+  content_parsed <- unlist(lapply(content_raw, parser), recursive = FALSE)
   structure(list(encoding = encoding, length = length(content_parsed), names = NA_character_,
               position = 0, reader = reader, content = content_parsed, feedurls = feedurls,
-              parser = parser, curlOpts = curlOpts, postFUN = postFUN, ...), 
+              parser = parser, curlOpts = curlOpts, postFUN = postFUN, retrieveFeedURL = retrieveFeedURL, ...), 
             class = unique(c(class, "WebSource", "SimpleSource")))
 }
 
@@ -49,7 +58,15 @@ source.update.WebXMLSource <-
 source.update.WebHTMLSource <- 
 source.update.WebJSONSource <- 
 function(x) {
-	content_raw <- getURL(x$feedurls, .opts = x$curlOpts)
+  content_raw <- NULL
+	if(x$retrieveFeedURL) {
+    content_raw <- getURL(x$feedurls, .opts = x$curlOpts)
+	} else {
+    content_raw <- x$feedurls
+  }
+  # Filter empty content
+  content_raw <- content_raw[sapply(content_raw, nchar) > 0]
+  
 	content_parsed <- unlist(lapply(content_raw, x$parser), recursive = FALSE)
 	x$content <- content_parsed
 	x$position <- 0
@@ -85,12 +102,12 @@ GoogleFinanceSource <- function(query, params =
 						output='rss'),...){
 	feed <- "http://www.google.com/finance/company_news"
 	parser <- function(cr){
-		tree <- parse(cr, type = "XML")
+		tree <- parse(cr, type = "XML", asText = FALSE)
 		xpathSApply(tree, path = "//item")
 	}
 	fq <- feedquery(feed, params)
   ws <- WebSource(feedurls = fq, class = "WebXMLSource", parser = parser, reader = readGoogle, 
-      postFUN = getLinkContent, ...)
+      postFUN = getLinkContent, retrieveFeedURL = FALSE,...)
 	ws
 }
 
@@ -116,16 +133,17 @@ GoogleFinanceSource <- function(query, params =
 #' @aliases readYahoo
 YahooFinanceSource <- function(query, params = 
 				list(	s= query, 
-						n = 20), ...){
-	feed <- "http://finance.yahoo.com/rss/headline"
+						region = "US",
+						lang = "en-US"), ...){
+	feed <- "http://feeds.finance.yahoo.com/rss/2.0/headline"
 	
 	fq <- feedquery(feed, params)
 	parser <- function(cr){
-		tree <- parse(cr, type = "XML")
+		tree <- parse(cr, type = "XML", asText = FALSE)
 		xpathSApply(tree, path = "//item")
 	}
 	ws <- WebSource(feedurls = fq, class = "WebXMLSource", parser = parser, reader = readYahoo, 
-      postFUN = getLinkContent, ...)
+      postFUN = getLinkContent, retrieveFeedURL = FALSE, ...)
 	ws
 }
 
@@ -154,13 +172,13 @@ GoogleNewsSource <- function(query, params =
 	feed <- "http://news.google.com/news"
 	fq <- feedquery(feed, params)
 	parser <- function(cr){
-		tree <- parse(cr, type = "XML")
+		tree <- parse(cr, type = "XML", asText = FALSE)
 		nodes <- xpathSApply(tree, path = "//item")
 		xmlns1 <- lapply(nodes, newXMLNamespace, "http://purl.org/dc/elements/1.1/", "dc")
 		nodes
 	}
 	ws <- WebSource(feedurls = fq, class = "WebXMLSource", parser = parser, reader = readGoogle,
-      postFUN = getLinkContent, ...)
+      postFUN = getLinkContent, retrieveFeedURL = FALSE, ...)
 	ws
 }
 
@@ -196,9 +214,8 @@ ReutersNewsSource <- function(query = 'businessNews', ...){
 	ws
 }
 
-#' @title Get feed data from Yahoo! News (\url{http://news.yahoo.com/}).
-#' @description Yahoo! News is a large news aggregator and provides a customizable RSS feed. 
-#' Only a maximum of 20 items can be retrieved.
+#' @title Get news data from Yahoo! News (\url{https://news.search.yahoo.com/search/}).
+#' @description Currently, only a maximum of 10 items can be retrieved.
 #' @author Mario Annau
 #' @param query words to be searched in Yahoo News, multiple words must be separated by '+'
 #' @param params, additional query parameters, see \url{http://developer.yahoo.com/rss/}
@@ -214,18 +231,16 @@ ReutersNewsSource <- function(query = 'businessNews', ...){
 #' @importFrom XML xpathSApply
 #' @importFrom XML getNodeSet
 #' @importFrom XML xmlValue
+#' @aliases readYahooHTML
 YahooNewsSource <- function(query, params = 
-				list(	p= query, 
-						n = 20,
-						ei = "UTF-8"), ...){
-	feed <- "http://news.search.yahoo.com/rss"
-	
+				list(	p= query), ...){
+	feed <- "https://news.search.yahoo.com/search"
 	fq <- feedquery(feed, params)
 	parser <- function(cr){
-		tree <- parse(cr, type = "XML")
-		xpathSApply(tree, path = "//item")
+		tree <- parse(cr, type = "HTML", useInternalNodes = TRUE)
+		xpathSApply(tree, path = "//div[contains(@class, 'dd algo')]")
 	}
-	ws <- WebSource(feedurls = fq, class = "WebXMLSource", parser = parser, reader = readYahoo, 
+	ws <- WebSource(feedurls = fq, class = "WebXMLSource", parser = parser, reader = readYahooHTML, 
       postFUN = getLinkContent, ...)
 	ws
 }
@@ -237,11 +252,13 @@ YahooNewsSource <- function(query, params =
 #' and other article metadata. Along with standard keyword searching, the API also offers faceted searching. 
 #' The available facets include Times-specific fields such as sections, taxonomic classifiers and controlled 
 #' vocabulary terms (names of people, organizations and geographic locations)."
-#' Feed retrieval is limited to 100 items.
+#' Feed retrieval is limited to 1000 items (or 100 pages).
 #' @author Mario Annau
 #' @param query character specifying query to be used to search NYTimes articles
-#' @param n number of results defaults to 100
+#' @param n number of items, defaults to 100
 #' @param count number of results per page, defaults to 10
+#' @param sleep integer; Seconds to sleep between feed retrieval.
+#' @param curlOpts CURLOptions; RCurl options used for feed retrieval.
 #' @param appid Developer App id to be used, obtained from \url{http://developer.nytimes.com/}
 #' @param params additional query parameters, specified as list, see \url{http://developer.nytimes.com/docs/read/article_search_api}
 #' @param ... additional parameters to \code{\link{WebSource}}
@@ -256,11 +273,17 @@ YahooNewsSource <- function(query, params =
 #' @importFrom RJSONIO fromJSON
 #' @importFrom boilerpipeR ArticleExtractor
 #' @aliases readNYTimes
-NYTimesSource <- function(query, n = 100, count = 10, appid, params = 
+NYTimesSource <- function(query, n = 100, appid, count = 10, 
+        sleep = 1, params = 
 		list(	format="json",
 				q = query,
-				page=seq(0, n-count, by = count),
-				"api-key" = appid),...){
+				page = 1:ceiling(n/count),
+				"api-key" = appid), 
+    curlOpts = curlOptions(	followlocation = TRUE, 
+        maxconnects = 10,
+        maxredirs = 10,
+        timeout = 30,
+        connecttimeout = 30), ...){
 	feed <- "http://api.nytimes.com/svc/search/v2/articlesearch.json"
 	fq <- feedquery(feed, params)
 	
@@ -268,13 +291,21 @@ NYTimesSource <- function(query, n = 100, count = 10, appid, params =
 		json <- parse(cr, type = "JSON")
 		json$response$docs
 	}
-	ws <- WebSource(feedurls = fq, class = "WebJSONSource", parser = parser, reader = readNYTimes, 
-      postFUN = getLinkContent, ...)
+  
+  start <- seq(1, length(fq), by = count)
+  end <- seq(count, length(fq), by = count)
+  
+  feedcontent <- sapply(1:length(start), function(i) {
+              fcontent <- getURL(fq[start[i]:end[i]], .opts = curlOpts)
+              Sys.sleep(sleep)
+              fcontent
+          })
+  
+	ws <- WebSource(feedurls = feedcontent, class = "WebJSONSource", parser = parser, reader = readNYTimes, 
+      postFUN = getLinkContent, retrieveFeedURL = FALSE, ...)
 	
 	ws
 }
-
-
 
 #' @title Get News from Yahoo Inplay.
 #' @description Yahoo Inplay lists a range of company news provided by Briefing.com. Since Yahoo Inplay
